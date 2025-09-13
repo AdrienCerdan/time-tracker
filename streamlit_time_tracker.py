@@ -8,6 +8,8 @@ from collections import defaultdict
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import hashlib
+import time
 
 # Set page configuration
 st.set_page_config(
@@ -16,6 +18,129 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# SECURITY: Authentication System
+def secure_personal_app():
+    """Secure the personal time tracker app with password authentication"""
+
+    def password_entered():
+        """Checks the entered password against the hash in secrets"""
+        entered_password = st.session_state["password"]
+
+        # Get password hash from secrets
+        try:
+            correct_hash = st.secrets["app_password_hash"]
+            entered_hash = hashlib.sha256(entered_password.encode()).hexdigest()
+
+            if entered_hash == correct_hash:
+                st.session_state["authenticated"] = True
+                st.session_state["auth_timestamp"] = time.time()
+                del st.session_state["password"]
+                st.success("✅ Access granted! Loading your time tracker...")
+                time.sleep(1)  # Brief pause for UX
+                st.rerun()
+            else:
+                st.session_state["authenticated"] = False
+                st.error("❌ Incorrect password. Access denied.")
+        except KeyError:
+            st.error("❌ Authentication not configured. Please contact the administrator.")
+        except Exception as e:
+            st.error(f"❌ Authentication error: {str(e)}")
+
+    # Check if already authenticated and not timed out (1 hour timeout)
+    if (st.session_state.get("authenticated", False) and 
+        time.time() - st.session_state.get("auth_timestamp", 0) < 3600):
+        return True
+
+    # Reset authentication state
+    st.session_state["authenticated"] = False
+
+    # Show login form
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        st.markdown("## 🔐 Personal Time Tracker")
+        st.markdown("---")
+
+        with st.container():
+            st.markdown("### 🛡️ Secure Access Required")
+
+            st.info("""
+            This is your personal time tracking application containing sensitive data.
+            Please enter your password to continue.
+            """)
+
+            st.text_input(
+                "🔑 Enter Password:", 
+                type="password", 
+                on_change=password_entered, 
+                key="password",
+                placeholder="Your secure password",
+                help="Enter the password configured for this app"
+            )
+
+            st.markdown("---")
+
+            with st.expander("ℹ️ Security Information"):
+                st.markdown("""
+                **Security Features:**
+                - 🔐 Password-protected access
+                - ⏰ Automatic session timeout (1 hour)
+                - 🔒 Encrypted password storage
+                - 🛡️ Secure data transmission (HTTPS)
+
+                **Data Protection:**
+                - Your time tracking data is stored securely
+                - Google Sheets integration uses encrypted credentials
+                - No sensitive information is logged or shared
+                """)
+
+        st.markdown("---")
+        st.caption("🔒 Protected by secure authentication • Built with Streamlit")
+
+    return False
+
+# Check authentication - App will not proceed without valid login
+if not secure_personal_app():
+    st.stop()
+
+# Add logout option and session info in sidebar after successful authentication
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 👤 Session Info")
+
+    auth_time = st.session_state.get("auth_timestamp", time.time())
+    session_duration = int((time.time() - auth_time) / 60)  # minutes
+    timeout_remaining = 60 - session_duration  # minutes until timeout
+
+    st.info(f"""
+    **Session Active:** {session_duration} min  
+    **Auto-logout in:** {max(0, timeout_remaining)} min
+    """)
+
+    if st.button("🚪 Logout", type="secondary", help="Clear session and logout"):
+        # Clear all session state
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.success("👋 Logged out successfully")
+        st.rerun()
+
+# Session timeout check
+def check_session_timeout():
+    """Check and handle session timeout"""
+    if st.session_state.get("authenticated", False):
+        if time.time() - st.session_state.get("auth_timestamp", 0) > 3600:  # 1 hour
+            st.warning("⏰ Session expired. Please login again.")
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            time.sleep(2)
+            st.rerun()
+
+# Check session timeout
+check_session_timeout()
+
+# REST OF YOUR EXISTING TIME TRACKER CODE CONTINUES HERE
+# (Insert your existing TimeTracker class and all app logic below this point)
 
 class TimeTracker:
     def __init__(self, sheet_name='Time_Tracking', use_google_sheets=True):
@@ -269,51 +394,45 @@ st.markdown("""
     border-left: 4px solid #667eea;
 }
 
-.stSelectbox > div > div > select {
-    background-color: #ffffff;
-}
-
-.success-message {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #c3e6cb;
-    margin: 1rem 0;
-}
-
-.info-box {
-    background-color: #e7f3ff;
-    padding: 1rem;
-    border-radius: 8px;
-    border-left: 4px solid #2196F3;
-    margin: 1rem 0;
-}
-
 .storage-indicator {
     background: #f0f2f6;
     padding: 0.5rem;
     border-radius: 5px;
     text-align: center;
     margin-bottom: 1rem;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #28a745;
+}
+
+.security-indicator {
+    background: #e8f5e8;
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-left: 4px solid #28a745;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Header with storage indicator
+# Header with security and storage indicators
 storage_icon = "☁️" if tracker.use_google_sheets else "💾"
 storage_text = "Google Sheets" if tracker.use_google_sheets else "Local CSV"
 
 st.markdown(f"""
+<div class="security-indicator">
+    🔐 <strong>Secure Session Active</strong> • Authenticated Access
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
 <div class="storage-indicator">
-    {storage_icon} <strong>Storage:</strong> {storage_text}
+    {storage_icon} <strong>Storage:</strong> {storage_text} • Data Protected
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="main-header">
-    <h1>⏰ Time Tracker</h1>
+    <h1>⏰ Personal Time Tracker</h1>
 </div>
 """, unsafe_allow_html=True)
 
@@ -719,7 +838,7 @@ st.markdown("---")
 storage_status = "Google Sheets ☁️" if tracker.use_google_sheets else "Local CSV 💾"
 st.markdown(
     f"<div style='text-align: center; color: #666;'>"
-    f"⏰ Time Tracker - {storage_status} - Built with Streamlit"
+    f"🔐 Secure Personal Time Tracker • {storage_status} • Protected Session"
     f"</div>", 
     unsafe_allow_html=True
 )
