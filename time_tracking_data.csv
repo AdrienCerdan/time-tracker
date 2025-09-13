@@ -1,0 +1,31 @@
+date,project,category,duration_hours,description
+2025-08-30,Project_A,coding,6.0,Authentication system development
+2025-08-30,Project_A,meeting,1.5,Team standup and planning
+2025-08-31,Project_B,coding,5.5,Frontend component creation
+2025-08-31,Project_B,research,2.0,UI/UX best practices research
+2025-09-01,Project_C,coding,4.0,Database schema design
+2025-09-01,Project_A,documentation,2.5,API documentation updates
+2025-09-02,Project_B,coding,7.0,Core feature implementation
+2025-09-02,Project_B,meeting,0.5,Quick client sync
+2025-09-03,Project_C,research,3.0,Technology stack evaluation
+2025-09-03,Project_A,coding,4.5,Bug fixes and optimization
+2025-09-06,Project_A,meeting,2.0,Sprint planning and retrospective
+2025-09-06,Project_A,coding,5.0,User interface improvements
+2025-09-07,Project_B,coding,6.5,Backend API development
+2025-09-07,Project_C,documentation,1.5,User manual creation
+2025-09-08,Project_C,coding,4.0,Data processing pipeline
+2025-09-08,Project_A,meeting,1.0,Code review session
+2025-09-09,Project_B,coding,3.5,Testing and quality assurance
+2025-09-09,Project_B,research,2.5,Performance optimization research
+2025-09-10,Project_C,coding,5.5,Integration and deployment
+2025-09-10,Project_A,documentation,1.0,README updates
+2025-09-09,Project_A,coding,7.5,Feature completion and testing
+2025-09-10,Project_B,meeting,1.5,Stakeholder presentation
+2025-09-10,Project_B,coding,4.0,Bug fixes and improvements
+2025-09-11,Project_C,coding,6.0,Final implementation phase
+2025-09-11,Project_A,meeting,0.75,Daily standup
+2025-09-12,Project_A,coding,5.0,Code cleanup and documentation
+2025-09-12,Project_B,research,2.0,Next sprint planning research
+2025-09-13,Project_C,coding,3.0,Current development work
+2025-09-13,project_test,testing,1.0,
+2025-09-13,project_test,testing,1.0,toto
