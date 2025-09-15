@@ -111,7 +111,7 @@ class GoogleSheetsTracker:
                 entry_date.strftime('%Y-%m-%d'),
                 project,
                 category,
-                float(duration),
+                f"{float(duration):.2f}".replace(",", "."),
                 description
             ]
             self.sheet.append_row(row, value_input_option="USER_ENTERED")
